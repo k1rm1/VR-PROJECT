@@ -24,22 +24,13 @@ public class SimpleShoot : MonoBehaviour
     public AudioClip fireSound;
     public AudioClip reload;
     public AudioClip noAmmo;
-    public Magazine magazine;
-    public XRBaseInteractor socketinteractor;
-    public void AddMagazine(XRBaseInteractable interactable) 
-    {
-        magazine = interactable.GetComponent<Magazine>();
-        source.PlayOneShot(reload);
-    }
-    public void RemoveMagazine(XRBaseInteractable interactable)
-    {
-        magazine = null;
-        source.PlayOneShot(reload);
-    }
-    public void Slide()
-    {
-
-    }
+  
+    public int maxammo = 10;
+    private int currentammo;
+    public TMPro.TextMeshPro text;
+   
+    
+   
 
     [System.Obsolete]
     void Start()
@@ -47,30 +38,38 @@ public class SimpleShoot : MonoBehaviour
         if (barrelLocation == null)
             barrelLocation = transform;
 
-        if (gunAnimator == null)
-            gunAnimator = GetComponentInChildren<Animator>();
-        socketinteractor.onSelectEnter.AddListener(AddMagazine);
-        socketinteractor.onSelectEnter.AddListener(RemoveMagazine);
+        Reload();
 
     }
-
-    public void PullTheTrigger()
+    void Reload()
     {
-        if (magazine && magazine.numberOfBullet > 0)
-        {
-            gunAnimator.SetTrigger("Fire");
-        }
-        else
-        {
-            source.PlayOneShot(noAmmo);
-        }
+        currentammo = maxammo;
+        source.PlayOneShot(reload);
     }
+     void Update()
+    {
+        if (Input.GetButtonDown("Fire1")|| Input.GetButtonDown("Fire2")){
+            if (currentammo > 0)
+            {
+                GetComponent<Animator>().SetTrigger("Fire");
+            }
+            else
+                source.PlayOneShot(noAmmo);
+        }
+        if (Vector3.Angle(transform.up,Vector3.up)>100&& currentammo < maxammo)
+        {
+            Reload();
+        }
+        text.text = currentammo.ToString();
+    }
+ 
 
 
     //This function creates the bullet behavior
     void Shoot()
     {
-        magazine.numberOfBullet--;
+
+        currentammo--;
         source.PlayOneShot(fireSound);
         if (muzzleFlashPrefab)
         {
@@ -81,11 +80,14 @@ public class SimpleShoot : MonoBehaviour
             //Destroy the muzzle flash effect
             Destroy(tempFlash, destroyTimer);
         }
+        RaycastHit hitInfo;
+        bool hasHit = Physics.Raycast(barrelLocation.position, barrelLocation.forward, out hitInfo, 100);
 
         //cancels if there's no bullet prefeb
         if (!bulletPrefab)
         { return; }
-
+ 
+        
         // Create a bullet and add force on it in direction of the barrel
         Instantiate(bulletPrefab, barrelLocation.position, barrelLocation.rotation).GetComponent<Rigidbody>().AddForce(barrelLocation.forward * shotPower);
 
