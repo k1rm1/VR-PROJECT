@@ -2,16 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Enemy : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void SetupRagdoll()
+    public SimpleShoot shooter;
+    private void Start()
     {
-
+        
     }
-   void Dead(Vector3 hitpoint)
+    private void Update()
     {
-        GetComponent<Animator>().enabled = false;
- 
+        transform.forward = Vector3.ProjectOnPlane((Camera.main.transform.position = transform.position), Vector3.up).normalized;
+    }
+    void Shoot()
+    {
+        shooter.Shoot();
     }
 }

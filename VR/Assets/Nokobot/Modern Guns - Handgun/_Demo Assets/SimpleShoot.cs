@@ -24,31 +24,45 @@ public class SimpleShoot : MonoBehaviour
     public AudioClip fireSound;
     public AudioClip reload;
     public AudioClip noAmmo;
-  
+
     public int maxammo = 10;
     private int currentammo;
     public TMPro.TextMeshPro text;
-   
-    
-   
+
+
+
 
     [System.Obsolete]
     void Start()
     {
         if (barrelLocation == null)
             barrelLocation = transform;
+        currentammo = maxammo;
 
-        Reload();
+       
 
     }
     void Reload()
     {
         currentammo = maxammo;
         source.PlayOneShot(reload);
+
     }
-     void Update()
+    void Update()
     {
-        if (Input.GetButtonDown("Fire1")|| Input.GetButtonDown("Fire2")){
+       
+        if (Vector3.Angle(transform.up, Vector3.up) > 100 && currentammo < maxammo)
+        {
+            Reload();
+        }
+        text.text = currentammo.ToString();
+    }
+
+
+    public void PullTheTrigger()
+    {
+        if (Input.GetButtonDown("Fire1"))
+        {
             if (currentammo > 0)
             {
                 GetComponent<Animator>().SetTrigger("Fire");
@@ -56,21 +70,13 @@ public class SimpleShoot : MonoBehaviour
             else
                 source.PlayOneShot(noAmmo);
         }
-        if (Vector3.Angle(transform.up,Vector3.up)>100&& currentammo < maxammo)
-        {
-            Reload();
-        }
-        text.text = currentammo.ToString();
     }
- 
-
-
     //This function creates the bullet behavior
-    void Shoot()
+    public void Shoot()
     {
 
         currentammo--;
-        source.PlayOneShot(fireSound);
+        source.PlayOneShot(fireSound);  
         if (muzzleFlashPrefab)
         {
             //Create the muzzle flash
